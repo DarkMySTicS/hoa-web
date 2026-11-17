@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+html,
+body {
+  height: 100%;
+}
+
+/* Hide native scrollbars on horizontal carousels — the swipe affordance is
+   carried by visible adjacent items, not a scrollbar gutter. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+#root {
+  height: 100%;
+}
+/* woff2 files are a pyftsubset build (Latin + punctuation only) of the
+   original TTF/OTF — ~85-93% smaller. The full files stay as a fallback
+   source for the rare browser that can't parse woff2. */
+@font-face {
+  font-family: "sectra";
+  src:
+    url("./assets/fonts/GT\ Sectra\ Display\ Regular.woff2") format("woff2"),
+    url("./assets/fonts/GT\ Sectra\ Display\ Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "helve";
+  src:
+    url("./assets/fonts/Helvetica\ Neue\ Regular.woff2") format("woff2"),
+    url("./assets/fonts/Helvetica\ Neue\ Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Attention pulse for CTA buttons on touch devices only.
+   Mobile users never see the :hover swap, so we run a 5s loop that briefly
+   flips both visuals (scale, color, text) into the hover state — restoring
+   to normal in between. Doesn't run on desktop (hover capable). */
+@keyframes ctaPulseMobile {
+  0%, 35%, 75%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 22px rgba(239, 68, 68, 0.25);
+  }
+  45%, 65% {
+    transform: scale(1.04);
+    box-shadow: 0 0 34px rgba(239, 68, 68, 0.7);
+  }
+}
+@keyframes ctaColorPulse {
+  0%, 35%, 75%, 100% {
+    background-color: #ffffff;
+    color: #dc2626;
+  }
+  45%, 65% {
+    background-color: #dc2626;
+    color: #ffffff;
+  }
+}
+@keyframes ctaTextNormal {
+  0%, 35%, 75%, 100% { opacity: 1; }
+  45%, 65% { opacity: 0; }
+}
+@keyframes ctaTextHover {
+  0%, 35%, 75%, 100% { opacity: 0; }
+  45%, 65% { opacity: 1; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .cta-pulse {
+    animation:
+      ctaPulseMobile 5s ease-in-out infinite,
+      ctaColorPulse 5s ease-in-out infinite;
+    will-change: transform, box-shadow, background-color, color;
+  }
+  .cta-pulse .cta-normal-text {
+    animation: ctaTextNormal 5s ease-in-out infinite;
+  }
+  .cta-pulse .cta-hover-text {
+    animation: ctaTextHover 5s ease-in-out infinite;
+  }
+  .cta-pulse:active,
+  .cta-pulse:active .cta-normal-text,
+  .cta-pulse:active .cta-hover-text {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-pulse,
+  .cta-pulse .cta-normal-text,
+  .cta-pulse .cta-hover-text {
+    animation: none !important;
+  }
+}
+
+/* Shared ambient background — used by Home4 and Services so both pages read
+   as one visual system instead of the flat black background pages used to
+   ship with. */
+/* iOS Safari lays `position: fixed` out against the *small* viewport — the
+   one with the toolbar visible. `inset-0` therefore stops where the toolbar
+   begins, so as soon as the toolbar retracts the strip it used to occupy
+   falls outside this layer and the black <body> shows through as a bar across
+   the bottom of the screen. Pinning the layer to the *large* viewport height
+   keeps it covered in both states; the surplus simply sits behind the toolbar
+   while that's on screen. (100vh already means the large viewport on iOS, so
+   it doubles as the fallback for browsers without lvh.) */
+.aurora-bg {
+  height: 100vh;
+  height: 100lvh;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  background: var(--aurora-color);
+  filter: blur(100px);
+  opacity: 0.6;
+  will-change: transform, opacity;
+}
+.aurora-grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+@keyframes auroraFloat {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(70px, -50px) scale(1.18); opacity: 0.75; }
+  66%  { transform: translate(-40px, 40px) scale(0.92); opacity: 0.45; }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.aurora-blob-a { animation: auroraFloat 12s ease-in-out infinite; }
+.aurora-blob-b { animation: auroraFloat 15s ease-in-out infinite reverse; }
+.aurora-blob-c { animation: auroraFloat 17s ease-in-out infinite; animation-delay: -6s; }
+.aurora-blob-d { animation: auroraFloat 13s ease-in-out infinite reverse; animation-delay: -9s; }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
+}
+
+/* Mobile / touch: the desktop treatment above is four ~600px layers, each
+   carrying a 100px blur, each promoted via will-change and animated forever.
+   iOS WebKit re-rasterises a blurred surface on every animated frame, and at
+   3x device pixel ratio those four surfaces blow past the per-tab memory
+   ceiling — WebKit kills the render process and the page just stays blank.
+   Every iOS browser is WebKit, so Chrome on iPhone fails identically.
+
+   On small/touch screens we drop the filter pass entirely: a radial gradient
+   paints the same soft glow with no blur, no layer promotion and no repaint
+   loop. Desktop is untouched. */
+@media (max-width: 1024px), (hover: none) {
+  .aurora-blob {
+    background: radial-gradient(
+      circle closest-side,
+      var(--aurora-color) 0%,
+      transparent 100%
+    );
+    filter: none;
+    will-change: auto;
+    animation: none !important;
+    opacity: 0.42;
+  }
+  /* Full-viewport blend modes force WebKit to keep a backdrop snapshot; at
+     0.05 opacity the grain isn't worth that cost on a phone. */
+  .aurora-grain {
+    display: none;
+  }
+}
+
+/* Mobile landscape — viewport is wide enough to look like tablet, but the
+   height is tiny so default paddings & font sizes overflow. Switch to a
+   2-column layout and compress the chrome so content fits without
+   scroll-wrestling. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-tight {
+    padding-top: 5.5rem !important;
+  }
+  .landscape-tight .home-grid {
+    display: grid !important;
+    grid-template-columns: 5fr 7fr !important;
+    gap: 1.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .landscape-tight .home-grid > section:first-of-type {
+    grid-column: span 1 / span 1 !important;
+    padding-top: 0 !important;
+  }
+  .landscape-tight .home-grid > section:nth-of-type(2) {
+    grid-column: span 1 / span 1 !important;
+    padding-top: 0 !important;
+  }
+  .landscape-tight .home-grid > section:nth-of-type(2) ul {
+    margin-left: auto !important;
+    max-width: none !important;
+    row-gap: 0.5rem !important;
+  }
+  .landscape-tight .home-grid > section:nth-of-type(2) ul > li {
+    padding-top: 0.1rem !important;
+    padding-bottom: 0.1rem !important;
+  }
+  .home-list-item .font-\[sectra\] {
+    font-size: 14px !important;
+    line-height: 1.1 !important;
+  }
+  .home-list-item .text-white\/70 {
+    font-size: 11px !important;
+    margin-top: 0.15rem !important;
+  }
+  .home-desc {
+    font-size: 12px !important;
+    margin-top: 10px !important;
+    max-width: 22rem !important;
+  }
+  .home-logo {
+    width: 11rem !important;
+  }
+  .home-logo img {
+    width: 13rem !important;
+  }
+  .home-cta {
+    margin-top: 0.75rem !important;
+  }
+  /* Hide the duplicated bottom mobile CTA in landscape — the top one is enough. */
+  .landscape-tight .home-grid > .home-cta {
+    display: none !important;
+  }
+  .sv-headline {
+    font-size: 36px !important;
+    line-height: 1 !important;
+  }
+  .sv-closer h2 {
+    font-size: 32px !important;
+    line-height: 1 !important;
+  }
+  .sv-lede {
+    font-size: 12px !important;
+  }
+  .vp-end-cta h2 {
+    font-size: 26px !important;
+  }
+  .vp-end-cta p {
+    font-size: 12px !important;
+    margin-top: 6px !important;
+  }
+  /* Ensure the videos top gradient bar doesn't eat half the frame. */
+  .vp-fade.absolute.inset-x-0.top-0 {
+    padding-top: 1rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+}

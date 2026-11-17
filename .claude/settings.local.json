@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite *)",
+      "Bash(du -h src/assets/loader.mp4)",
+      "Bash(stat -c%s src/assets/loader.mp4)",
+      "Bash(powershell -c \"\\(Get-Item 'src/assets/loader.mp4'\\).Length\")",
+      "Bash(node -e \"require\\('@babel/parser'\\).parse\\(require\\('fs'\\).readFileSync\\('src/Pages/Home.jsx','utf8'\\),{sourceType:'module',plugins:['jsx']}\\);console.log\\('parse ok'\\)\")",
+      "Bash(unzip -p \"HOA Lead Form Features.docx\" word/document.xml)",
+      "Bash(unzip -p \"HOA Lead Form Question.docx\" word/document.xml)",
+      "Bash(python -c ' *)",
+      "Bash(echo \"---installed: $?\")",
+      "Bash(unzip -p \"HOA CRM Features.docx\" word/document.xml)",
+      "Read(//tmp/**)",
+      "Bash(npx eslint *)",
+      "Bash(npm install *)",
+      "Bash(python -c \"from docx import Document; doc = Document\\('HOA Service Page.docx'\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
+      "Bash(unzip -p \"HOA Service Page.docx\" word/document.xml)",
+      "Read(//d/Coding stuff/HOA/**)",
+      "Read(//d/Coding stuff/HOA/cms/**)"
+    ]
+  }
+}
